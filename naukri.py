@@ -14,6 +14,7 @@ from selenium.common.exceptions import NoSuchElementException
 from selenium.common.exceptions import NoAlertPresentException
 from PyPDF2 import PdfFileReader, PdfFileWriter
 import random, string, io
+from datetime import datetime
 from reportlab.pdfgen import canvas
 from reportlab.lib.pagesizes import letter
 from webdriver_manager.chrome import ChromeDriverManager
@@ -27,6 +28,9 @@ modifiedResumePath = "modified_resume.pdf"
 username = "Type Your email ID Here"
 password = "Type Your Password Here"
 mob = "1234567890"  # Type your mobile number here
+
+# False if you dont want to add Random HIDDEN chars to your resume
+updatePDF = True
 
 # ----- No other changes required -----
 
@@ -185,16 +189,16 @@ def naukriLogin():
             time.sleep(1)
             passFieldElement = GetElement(driver, "pwd1", locator="ID")
             time.sleep(1)
-            loginButton = driver.find_element_by_xpath(
-                "//*[@type='submit' and @value='Login']"
-            )
+            loginXpath = "//*[@type='submit' and @value='Login']"
+            loginButton = driver.find_element_by_xpath(loginXpath)
 
         elif is_element_present(driver, By.ID, "usernameField"):
             emailFieldElement = GetElement(driver, "usernameField", locator="ID")
             time.sleep(1)
             passFieldElement = GetElement(driver, "passwordField", locator="ID")
             time.sleep(1)
-            loginButton = driver.find_element_by_xpath('//*[@type="submit"]')
+            loginXpath = '//*[@type="submit"]'
+            loginButton = driver.find_element_by_xpath(loginXpath)
 
         else:
             log_msg("None of the elements found to login.")
@@ -202,19 +206,18 @@ def naukriLogin():
         if emailFieldElement is not None:
             emailFieldElement.clear()
             emailFieldElement.send_keys(username)
+            time.sleep(1)
             passFieldElement.clear()
             passFieldElement.send_keys(password)
             time.sleep(1)
             loginButton.send_keys(Keys.ENTER)
+            time.sleep(1)
 
             # Added click to Skip button
             print("Checking Skip button")
-            if WaitTillElementPresent(
-                driver, "//*[text() = 'SKIP AND CONTINUE']", locator="XPATH", timeout=10
-            ):
-                GetElement(
-                    driver, "//*[text() = 'SKIP AND CONTINUE']", locator="XPATH"
-                ).click()
+            skipAdXpath = "//*[text() = 'SKIP AND CONTINUE']"
+            if WaitTillElementPresent(driver, skipAdXpath, locator="XPATH", timeout=10):
+                GetElement(driver, skipAdXpath, locator="XPATH").click()
 
             # CheckPoint to verify login
             if WaitTillElementPresent(driver, "search-jobs", locator="ID", timeout=40):
@@ -226,6 +229,9 @@ def naukriLogin():
                 else:
                     log_msg("Unknown Login Error")
                     return (status, driver)
+            else:
+                log_msg("Unknown Login Error")
+                return (status, driver)
 
     except Exception as e:
         catch(e)
@@ -239,19 +245,17 @@ def UpdateProfile(driver):
         saveXpath = "//button[@ type='submit'][@value='Save Changes'] | //*[@id='saveBasicDetailsBtn']"
         editXpath = "//em[text()='Edit']"
 
-        WaitTillElementPresent(driver, profeditXpath, locator="XPATH", timeout=20)
+        WaitTillElementPresent(driver, profeditXpath, "XPATH", 20)
         profElement = GetElement(driver, profeditXpath, locator="XPATH")
         profElement.click()
         driver.implicitly_wait(2)
 
-        WaitTillElementPresent(
-            driver, editXpath + " | " + saveXpath, locator="XPATH", timeout=20
-        )
+        WaitTillElementPresent(driver, editXpath + " | " + saveXpath, "XPATH", 20)
         if is_element_present(driver, By.XPATH, editXpath):
             editElement = GetElement(driver, editXpath, locator="XPATH")
             editElement.click()
 
-            WaitTillElementPresent(driver, mobXpath, locator="XPATH", timeout=20)
+            WaitTillElementPresent(driver, mobXpath, "XPATH", 20)
             mobFieldElement = GetElement(driver, mobXpath, locator="XPATH")
             mobFieldElement.clear()
             mobFieldElement.send_keys(mob)
@@ -261,9 +265,7 @@ def UpdateProfile(driver):
             saveFieldElement.send_keys(Keys.ENTER)
             driver.implicitly_wait(3)
 
-            WaitTillElementPresent(
-                driver, "//*[text()='today']", locator="XPATH", timeout=10
-            )
+            WaitTillElementPresent(driver, "//*[text()='today']", "XPATH", 10)
             if is_element_present(driver, By.XPATH, "//*[text()='today']"):
                 log_msg("Profile Update Successful")
             else:
@@ -335,7 +337,7 @@ def UpdateResume():
 def UploadResume(driver, resumePath):
     try:
         attachCVID = "attachCV"
-        CheckPointID = "attachCVMsgBox"
+        CheckPointXpath = "//*[contains(@class, 'updateOn')]"
         saveXpath = "//button[@type='button']"
 
         driver.get("https://www.naukri.com/mnjuser/profile")
@@ -343,16 +345,28 @@ def UploadResume(driver, resumePath):
         AttachElement = GetElement(driver, attachCVID, locator="ID")
         AttachElement.send_keys(resumePath)
 
-        WaitTillElementPresent(driver, CheckPointID, locator="ID", timeout=30)
-        CheckPoint = GetElement(driver, CheckPointID, locator="ID")
-        if CheckPoint and "success" in CheckPoint.text.lower():
-            log_msg("Resume Document Upload Successful")
-        else:
-            log_msg("Resume Document Upload failed")
-
         if WaitTillElementPresent(driver, saveXpath, locator="ID", timeout=5):
             saveElement = GetElement(driver, saveXpath, locator="XPATH")
             saveElement.click()
+
+        WaitTillElementPresent(driver, CheckPointXpath, locator="XPATH", timeout=30)
+        CheckPoint = GetElement(driver, CheckPointXpath, locator="XPATH")
+        if CheckPoint:
+            LastUpdatedDate = CheckPoint.text
+            todaysDate1 = datetime.today().strftime("%b %d, %Y")
+            todaysDate2 = datetime.today().strftime("%b %#d, %Y")
+            if todaysDate1 in LastUpdatedDate or todaysDate2 in LastUpdatedDate:
+                log_msg(
+                    "Resume Document Upload Successful. Last Updated date = %s"
+                    % LastUpdatedDate
+                )
+            else:
+                log_msg(
+                    "Resume Document Upload failed. Last Updated date = %s"
+                    % LastUpdatedDate
+                )
+        else:
+            log_msg("Resume Document Upload failed. Last Updated date not found.")
 
     except Exception as e:
         catch(e)
@@ -367,8 +381,11 @@ def main():
         if status:
             UpdateProfile(driver)
             if os.path.exists(originalResumePath):
-                resumePath = UpdateResume()
-                UploadResume(driver, resumePath)
+                if updatePDF:
+                    resumePath = UpdateResume()
+                    UploadResume(driver, resumePath)
+                else:
+                    UploadResume(driver, originalResumePath)
             else:
                 log_msg("Resume not found at %s " % originalResumePath)
 

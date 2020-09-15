@@ -20,4 +20,4 @@ install:
 
 # command to run tests
 script:
-  - test.py
+  - python -m unittest test

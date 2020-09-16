@@ -161,7 +161,7 @@ def tearDown(driver):
         pass
 
 
-def naukriLogin():
+def naukriLogin(headless = False):
     """ Open Chrome browser and Login to Naukri.com"""
     status = False
     driver = None
@@ -170,6 +170,9 @@ def naukriLogin():
     options.add_argument("--start-maximized")  # ("--kiosk") for MAC
     options.add_argument("--disable-popups")
     options.add_argument("--disable-gpu")
+    if headless:
+        options.add_argument("--disable-dev-shm-usage")
+        options.add_argument("headless")
 
     try:
         # updated to use ChromeDriverManager to match correct chromedriver automatically

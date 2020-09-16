@@ -1,5 +1,5 @@
 # Daily Naukri Update
-[![license](https://img.shields.io/badge/License-GPL%20v3-blue.svg)](https://github.com/navchandar/Naukri/blob/master/LICENSE) [![Code Climate](https://codeclimate.com/github/navchandar/Naukri.svg)](https://codeclimate.com/github/navchandar/Naukri)
+[![license](https://img.shields.io/badge/License-GPL%20v3-blue.svg)](https://github.com/navchandar/Naukri/blob/master/LICENSE) [![Build Status](https://travis-ci.com/navchandar/Naukri.svg?branch=master)](https://travis-ci.com/navchandar/Naukri)  [![Code Climate](https://codeclimate.com/github/navchandar/Naukri.svg)](https://codeclimate.com/github/navchandar/Naukri)
 [![HitCount](http://hits.dwyl.io/navchandar/Naukri.svg)](http://hits.dwyl.io/navchandar/Naukri) [![made-with-python](https://img.shields.io/badge/Made%20with-Python-1f425f.svg)](https://www.python.org/) 
 
 

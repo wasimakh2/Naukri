@@ -3,7 +3,7 @@ import naukri
 
 class Test(unittest.TestCase):
     def test_naukri(self):
-        (status, driver) = naukri.naukriLogin()
+        (status, driver) = naukri.naukriLogin(headless = True)
         naukri.tearDown(driver)
         self.assertFalse(status)
 

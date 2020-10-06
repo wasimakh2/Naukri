@@ -112,7 +112,7 @@ def WaitTillElementPresent(driver, elementTag, locator="ID", timeout=30):
     for i in range(timeout):
         time.sleep(0.99)
         try:
-            if is_element_present(driver, getObj(_locator), elementTag):
+            if is_element_present(driver, getObj(locator), elementTag):
                 result = True
                 break
         except Exception as e:

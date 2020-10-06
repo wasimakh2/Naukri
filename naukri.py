@@ -60,22 +60,25 @@ def catch(error):
     logging.error(msg)
 
 
-class ByObj(Enum):
+def getObj(locatorType):
     """This map defines how elements are identified"""
-    ID = By.ID
-    NAME = By.NAME
-    XPATH = By.XPATH
-    TAG = By.TAG_NAME
-    CLASS = By.CLASS_NAME
-    CSS = By.CSS_SELECTOR
-    LINKTEXT = By.LINK_TEXT
+    map = {
+        "ID" : By.ID,
+        "NAME" : By.NAME,
+        "XPATH" : By.XPATH,
+        "TAG" : By.TAG_NAME,
+        "CLASS" : By.CLASS_NAME,
+        "CSS" : By.CSS_SELECTOR,
+        "LINKTEXT" : By.LINK_TEXT
+    }
+    return map[locatorType]
 
 
 def GetElement(driver, elementTag, locator="ID"):
     """Wait max 15 secs for element and then select when it is available"""
     try:
         def _get_element(_tag, _locator):
-            _by = ByObj[_locator].value
+            _by = getObj(_locator)
             if is_element_present(driver, _by, _tag):
                 return WebDriverWait(driver, 15).until(
                     lambda d: driver.find_element(_by, _tag))
@@ -109,7 +112,7 @@ def WaitTillElementPresent(driver, elementTag, locator="ID", timeout=30):
     for i in range(timeout):
         time.sleep(0.99)
         try:
-            if is_element_present(driver, ByObj[locator].value, element_tag):
+            if is_element_present(driver, getObj(_locator), element_tag):
                 result = True
                 break
         except Exception as e:

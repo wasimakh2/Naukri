@@ -83,11 +83,11 @@ def GetElement(driver, elementTag, locator="ID"):
                 return WebDriverWait(driver, 15).until(
                     lambda d: driver.find_element(_by, _tag))
 
-        element = _get_element(element_tag, locator.upper())
+        element = _get_element(elementTag, locator.upper())
         if element:
             return element
         else:
-            log_msg("Element not found with %s : %s", locator, element_tag)
+            log_msg("Element not found with %s : %s", locator, elementTag)
             return None
     except Exception as e:
         catch(e)
@@ -112,7 +112,7 @@ def WaitTillElementPresent(driver, elementTag, locator="ID", timeout=30):
     for i in range(timeout):
         time.sleep(0.99)
         try:
-            if is_element_present(driver, getObj(_locator), element_tag):
+            if is_element_present(driver, getObj(_locator), elementTag):
                 result = True
                 break
         except Exception as e:
@@ -120,7 +120,7 @@ def WaitTillElementPresent(driver, elementTag, locator="ID", timeout=30):
             pass
 
     if not result:
-        log_msg("Element not found with %s : %s", locator, element_tag)
+        log_msg("Element not found with %s : %s", locator, elementTag)
     driver.implicitly_wait(3)
     return result
 

@@ -1,6 +1,7 @@
 #! python3
 # -*- coding: utf-8 -*-
 """Naukri Daily update - Using Chrome"""
+
 import re
 import os
 import sys
@@ -17,7 +18,7 @@ import random, string, io
 from datetime import datetime
 from reportlab.pdfgen import canvas
 from reportlab.lib.pagesizes import letter
-from webdriver_manager.chrome import ChromeDriverManager
+from webdriver_manager.chrome import ChromeDriverManager as CM
 
 # Add folder Path of your resume
 originalResumePath = "original_resume.pdf"
@@ -37,9 +38,8 @@ updatePDF = True
 # Set login URL
 NaukriURL = "https://login.naukri.com/nLogin/Login.php"
 
-log_file_path = "naukri.log"
 logging.basicConfig(
-    level=logging.INFO, filename=log_file_path, format="%(asctime)s    : %(message)s"
+    level=logging.INFO, filename="naukri.log", format="%(asctime)s    : %(message)s"
 )
 # logging.disable(logging.CRITICAL)
 os.environ["WDM_LOG_LEVEL"] = "0"
@@ -60,45 +60,31 @@ def catch(error):
     logging.error(msg)
 
 
+class ByObj(Enum):
+    """This map defines how elements are identified"""
+    ID = By.ID
+    NAME = By.NAME
+    XPATH = By.XPATH
+    TAG = By.TAG_NAME
+    CLASS = By.CLASS_NAME
+    CSS = By.CSS_SELECTOR
+    LINKTEXT = By.LINK_TEXT
+
+
 def GetElement(driver, elementTag, locator="ID"):
     """Wait max 15 secs for element and then select when it is available"""
     try:
-        if locator == "ID":
-            if is_element_present(driver, By.ID, elementTag):
+        def _get_elem(_tag, _locator):
+            _by = ByObj[_locator].value
+            if is_element_present(driver, _by, _tag):
                 return WebDriverWait(driver, 15).until(
-                    lambda driver: driver.find_element_by_id(elementTag)
-                )
-            else:
-                log_msg("%s Not Found." % elementTag)
-                return None
+                    lambda driver: driver.find_element(_by, _tag))
 
-        elif locator == "NAME":
-            if is_element_present(driver, By.NAME, elementTag):
-                return WebDriverWait(driver, 15).until(
-                    lambda driver: driver.find_element_by_name(elementTag)
-                )
-            else:
-                log_msg("%s Not Found." % elementTag)
-                return None
-
-        elif locator == "XPATH":
-            if is_element_present(driver, By.XPATH, elementTag):
-                return WebDriverWait(driver, 15).until(
-                    lambda driver: driver.find_element_by_xpath(elementTag)
-                )
-            else:
-                log_msg("%s Not Found." % elementTag)
-                return None
-
-        elif locator == "CSS":
-            if is_element_present(driver, By.CSS_SELECTOR, elementTag):
-                return WebDriverWait(driver, 15).until(
-                    lambda driver: driver.find_element_by_css_selector(elementTag)
-                )
-            else:
-                log_msg("%s Not Found." % elementTag)
-                return None
-
+        if element := _get_elem(element_tag, locator.upper()):
+            return element
+        else:
+            log_msg("Element not found with %s : %s", locator, element_tag)
+            return None
     except Exception as e:
         catch(e)
     return None
@@ -117,30 +103,20 @@ def WaitTillElementPresent(driver, elementTag, locator="ID", timeout=30):
     """Wait till element present. Default 30 seconds"""
     result = False
     driver.implicitly_wait(0)
+    locator = locator.upper()
+
     for i in range(timeout):
-        try:
-            if locator == "ID":
-                if is_element_present(driver, By.ID, elementTag):
-                    result = True
-                    break
-            elif locator == "NAME":
-                if is_element_present(driver, By.NAME, elementTag):
-                    result = True
-                    break
-            elif locator == "XPATH":
-                if is_element_present(driver, By.XPATH, elementTag):
-                    result = True
-                    break
-            elif locator == "CSS":
-                if is_element_present(driver, By.CSS_SELECTORS, elementTag):
-                    result = True
-                    break
-        except Exception as e:
-            log_msg("Exception when WaitTillElementPresent : %s" % e)
-            pass
         time.sleep(0.99)
-    else:
-        log_msg("Timed out. Element not found: %s" % elementTag)
+        try:
+            if is_element_present(driver, ByObj[locator].value, element_tag):
+                result = True
+                break
+        except Exception as e:
+            log_msg('Exception when WaitTillElementPresent : %s', e)
+            pass
+
+    if not result:
+        log_msg("Element not found with %s : %s", locator, element_tag)
     driver.implicitly_wait(3)
     return result
 
@@ -161,10 +137,8 @@ def tearDown(driver):
         pass
 
 
-def naukriLogin(headless = False):
-    """ Open Chrome browser and Login to Naukri.com"""
-    status = False
-    driver = None
+def LoadNaukri(headless):
+    """Open Chrome to load Naukri.com"""
     options = webdriver.ChromeOptions()
     options.add_argument("--disable-notifications")
     options.add_argument("--start-maximized")  # ("--kiosk") for MAC
@@ -174,15 +148,22 @@ def naukriLogin(headless = False):
         options.add_argument("--disable-dev-shm-usage")
         options.add_argument("headless")
 
-    try:
-        # updated to use ChromeDriverManager to match correct chromedriver automatically
-        driver = webdriver.Chrome(
-            executable_path=ChromeDriverManager().install(), options=options
-        )
-        log_msg("Google Chrome Launched!")
+    # updated to use ChromeDriverManager to match correct chromedriver automatically
+    driver = webdriver.Chrome(executable_path=CM().install(), options=options)
+    log_msg("Google Chrome Launched!")
 
-        driver.implicitly_wait(3)
-        driver.get(NaukriURL)
+    driver.implicitly_wait(3)
+    driver.get(NaukriURL)
+    return driver
+
+
+def naukriLogin(headless = False):
+    """ Open Chrome browser and Login to Naukri.com"""
+    status = False
+    driver = None
+
+    try:
+        driver = LoadNaukri(headless)
 
         if "naukri" in driver.title.lower():
             log_msg("Website Loaded Successfully.")

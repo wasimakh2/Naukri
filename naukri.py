@@ -87,7 +87,7 @@ def GetElement(driver, elementTag, locator="ID"):
         if element:
             return element
         else:
-            log_msg("Element not found with %s : %s", locator, elementTag)
+            log_msg("Element not found with %s : %s" % (locator, elementTag))
             return None
     except Exception as e:
         catch(e)
@@ -116,11 +116,11 @@ def WaitTillElementPresent(driver, elementTag, locator="ID", timeout=30):
                 result = True
                 break
         except Exception as e:
-            log_msg('Exception when WaitTillElementPresent : %s', e)
+            log_msg('Exception when WaitTillElementPresent : %s' %e)
             pass
 
     if not result:
-        log_msg("Element not found with %s : %s", locator, elementTag)
+        log_msg("Element not found with %s : %s" % (locator, elementTag))
     driver.implicitly_wait(3)
     return result
 

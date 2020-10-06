@@ -74,13 +74,14 @@ class ByObj(Enum):
 def GetElement(driver, elementTag, locator="ID"):
     """Wait max 15 secs for element and then select when it is available"""
     try:
-        def _get_elem(_tag, _locator):
+        def _get_element(_tag, _locator):
             _by = ByObj[_locator].value
             if is_element_present(driver, _by, _tag):
                 return WebDriverWait(driver, 15).until(
-                    lambda driver: driver.find_element(_by, _tag))
+                    lambda d: driver.find_element(_by, _tag))
 
-        if element := _get_elem(element_tag, locator.upper()):
+        element = _get_element(element_tag, locator.upper())
+        if element:
             return element
         else:
             log_msg("Element not found with %s : %s", locator, element_tag)

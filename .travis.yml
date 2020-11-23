@@ -27,10 +27,8 @@ branches:
   only:
     - master
 
-# command to install dependencies
 install:
-  - pip3 install --upgrade pip
-  - pip3 install -r requirements.txt
+  - pip3 install -r requirements.txt    # install dependencies
 
 # command to run tests
 script: python -m unittest test || python3 -m unittest test.py

@@ -11,6 +11,18 @@ Use this script to update your Naukri Profile on schedule everyday, this can be 
 
 In order to use this, you need to have Python 3, Google Chrome and Selenium webdriver for Chrome in your machine.
 
+## Installation
+
+Install [Python 3](https://www.python.org/getit/)
+
+```bash
+git clone https://github.com/navchandar/Naukri.git
+cd Naukri
+pip install --upgrade pip
+pip install -r requirements.txt
+python naukri.py
+```
+
 
 ## Browsers support
 

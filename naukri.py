@@ -153,7 +153,11 @@ def LoadNaukri(headless):
         options.add_argument("headless")
 
     # updated to use ChromeDriverManager to match correct chromedriver automatically
-    driver = webdriver.Chrome(executable_path=CM().install(), options=options)
+    driver = None
+    try:
+        driver = webdriver.Chrome(executable_path=CM().install(), options=options)
+    except:
+        driver = webdriver.Chrome(options=options)
     log_msg("Google Chrome Launched!")
 
     driver.implicitly_wait(3)

@@ -34,4 +34,5 @@ install:
   - pip3 install -r requirements.txt    # install dependencies
 
 # command to run tests
-script: python -m unittest test || python3 -m unittest test.py
+script:
+  - python -m unittest test || python3 -m unittest test.py

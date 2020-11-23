@@ -9,7 +9,6 @@ jobs:
       addons:
         apt:
           packages:
-          - firefox
           - chromium-browser
           - chromium-chromedriver
 
@@ -18,8 +17,8 @@ jobs:
       language: shell       # 'language: python' is an error on Travis CI Windows
       before_install:
         - choco install python --version 3.8.0
-        - python -m pip install --upgrade pip
         - choco install googlechrome
+        - choco install chromedriver
       env: PATH=/c/Python38:/c/Python38/Scripts:$PATH
       addons:
         chrome: stable
@@ -34,4 +33,4 @@ install:
   - pip3 install -r requirements.txt
 
 # command to run tests
-script: python3 -m unittest test.py || python -m unittest test
+script: python -m unittest test || python3 -m unittest test.py
